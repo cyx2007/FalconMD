@@ -1,0 +1,518 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A01F0C2B0000000000000101 /* FalconMDApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000201 /* FalconMDApp.swift */; };
+		A01F0C2B0000000000000102 /* MarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000202 /* MarkdownDocument.swift */; };
+		A01F0C2B0000000000000103 /* MarkdownEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000203 /* MarkdownEditorView.swift */; };
+		A01F0C2B0000000000000104 /* LocalImageProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000204 /* LocalImageProvider.swift */; };
+		A01F0C2B0000000000000105 /* FormatCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000205 /* FormatCommands.swift */; };
+		A01F0C2B000000000000010A /* FindReplaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000209 /* FindReplaceBar.swift */; };
+		A01F0C2B000000000000010B /* StartPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B000000000000020A /* StartPageView.swift */; };
+		A01F0C2B0000000000000106 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000206 /* Assets.xcassets */; };
+		A01F0C2B0000000000000107 /* MarkdownEngine in Frameworks */ = {isa = PBXBuildFile; productRef = A01F0C2B0000000000000301 /* MarkdownEngine */; };
+		A01F0C2B0000000000000108 /* MarkdownEngineCodeBlocks in Frameworks */ = {isa = PBXBuildFile; productRef = A01F0C2B0000000000000302 /* MarkdownEngineCodeBlocks */; };
+		A01F0C2B0000000000000109 /* MarkdownDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000207 /* MarkdownDocumentTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A01F0C2B0000000000000401 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A01F0C2B0000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A01F0C2B0000000000000002;
+			remoteInfo = FalconMD;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A01F0C2B0000000000000003 /* FalconMD.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FalconMD.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A01F0C2B0000000000000004 /* FalconMDTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FalconMDTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A01F0C2B0000000000000201 /* FalconMDApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FalconMDApp.swift; sourceTree = "<group>"; };
+		A01F0C2B0000000000000202 /* MarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocument.swift; sourceTree = "<group>"; };
+		A01F0C2B0000000000000203 /* MarkdownEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditorView.swift; sourceTree = "<group>"; };
+		A01F0C2B0000000000000204 /* LocalImageProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalImageProvider.swift; sourceTree = "<group>"; };
+		A01F0C2B0000000000000205 /* FormatCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatCommands.swift; sourceTree = "<group>"; };
+		A01F0C2B0000000000000209 /* FindReplaceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindReplaceBar.swift; sourceTree = "<group>"; };
+		A01F0C2B000000000000020A /* StartPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPageView.swift; sourceTree = "<group>"; };
+		A01F0C2B0000000000000206 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A01F0C2B0000000000000208 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A01F0C2B0000000000000207 /* MarkdownDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocumentTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A01F0C2B0000000000000501 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A01F0C2B0000000000000107 /* MarkdownEngine in Frameworks */,
+				A01F0C2B0000000000000108 /* MarkdownEngineCodeBlocks in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A01F0C2B0000000000000502 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A01F0C2B0000000000000601 = {
+			isa = PBXGroup;
+			children = (
+				A01F0C2B0000000000000602 /* FalconMD */,
+				A01F0C2B0000000000000603 /* FalconMDTests */,
+				A01F0C2B0000000000000604 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A01F0C2B0000000000000602 /* FalconMD */ = {
+			isa = PBXGroup;
+			children = (
+				A01F0C2B0000000000000201 /* FalconMDApp.swift */,
+				A01F0C2B0000000000000202 /* MarkdownDocument.swift */,
+				A01F0C2B0000000000000203 /* MarkdownEditorView.swift */,
+				A01F0C2B0000000000000204 /* LocalImageProvider.swift */,
+				A01F0C2B0000000000000205 /* FormatCommands.swift */,
+				A01F0C2B0000000000000209 /* FindReplaceBar.swift */,
+				A01F0C2B000000000000020A /* StartPageView.swift */,
+				A01F0C2B0000000000000206 /* Assets.xcassets */,
+				A01F0C2B0000000000000208 /* Info.plist */,
+			);
+			path = FalconMD;
+			sourceTree = "<group>";
+		};
+		A01F0C2B0000000000000603 /* FalconMDTests */ = {
+			isa = PBXGroup;
+			children = (
+				A01F0C2B0000000000000207 /* MarkdownDocumentTests.swift */,
+			);
+			path = FalconMDTests;
+			sourceTree = "<group>";
+		};
+		A01F0C2B0000000000000604 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A01F0C2B0000000000000003 /* FalconMD.app */,
+				A01F0C2B0000000000000004 /* FalconMDTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A01F0C2B0000000000000002 /* FalconMD */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A01F0C2B0000000000000701 /* Build configuration list for PBXNativeTarget "FalconMD" */;
+			buildPhases = (
+				A01F0C2B0000000000000801 /* Sources */,
+				A01F0C2B0000000000000501 /* Frameworks */,
+				A01F0C2B0000000000000802 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FalconMD;
+			packageProductDependencies = (
+				A01F0C2B0000000000000301 /* MarkdownEngine */,
+				A01F0C2B0000000000000302 /* MarkdownEngineCodeBlocks */,
+			);
+			productName = FalconMD;
+			productReference = A01F0C2B0000000000000003 /* FalconMD.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A01F0C2B0000000000000005 /* FalconMDTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A01F0C2B0000000000000702 /* Build configuration list for PBXNativeTarget "FalconMDTests" */;
+			buildPhases = (
+				A01F0C2B0000000000000803 /* Sources */,
+				A01F0C2B0000000000000502 /* Frameworks */,
+				A01F0C2B0000000000000804 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A01F0C2B0000000000000402 /* PBXTargetDependency */,
+			);
+			name = FalconMDTests;
+			productName = FalconMDTests;
+			productReference = A01F0C2B0000000000000004 /* FalconMDTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A01F0C2B0000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					A01F0C2B0000000000000002 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					A01F0C2B0000000000000005 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = A01F0C2B0000000000000002;
+					};
+				};
+			};
+			buildConfigurationList = A01F0C2B0000000000000703 /* Build configuration list for PBXProject "FalconMD" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A01F0C2B0000000000000601;
+			packageReferences = (
+				A01F0C2B0000000000000300 /* XCRemoteSwiftPackageReference "swift-markdown-engine" */,
+			);
+			productRefGroup = A01F0C2B0000000000000604 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A01F0C2B0000000000000002 /* FalconMD */,
+				A01F0C2B0000000000000005 /* FalconMDTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A01F0C2B0000000000000802 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A01F0C2B0000000000000106 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A01F0C2B0000000000000804 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A01F0C2B0000000000000801 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A01F0C2B0000000000000101 /* FalconMDApp.swift in Sources */,
+				A01F0C2B0000000000000102 /* MarkdownDocument.swift in Sources */,
+				A01F0C2B0000000000000103 /* MarkdownEditorView.swift in Sources */,
+				A01F0C2B0000000000000104 /* LocalImageProvider.swift in Sources */,
+				A01F0C2B0000000000000105 /* FormatCommands.swift in Sources */,
+				A01F0C2B000000000000010A /* FindReplaceBar.swift in Sources */,
+				A01F0C2B000000000000010B /* StartPageView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A01F0C2B0000000000000803 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A01F0C2B0000000000000109 /* MarkdownDocumentTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A01F0C2B0000000000000402 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A01F0C2B0000000000000002 /* FalconMD */;
+			targetProxy = A01F0C2B0000000000000401 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A01F0C2B0000000000000901 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A01F0C2B0000000000000902 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A01F0C2B0000000000000903 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FalconMD/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FalconMD;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.falconmd.FalconMD;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A01F0C2B0000000000000904 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FalconMD/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FalconMD;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.falconmd.FalconMD;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A01F0C2B0000000000000905 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.falconmd.FalconMDTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FalconMD.app/Contents/MacOS/FalconMD";
+			};
+			name = Debug;
+		};
+		A01F0C2B0000000000000906 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.falconmd.FalconMDTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FalconMD.app/Contents/MacOS/FalconMD";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A01F0C2B0000000000000701 /* Build configuration list for PBXNativeTarget "FalconMD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A01F0C2B0000000000000903 /* Debug */,
+				A01F0C2B0000000000000904 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A01F0C2B0000000000000702 /* Build configuration list for PBXNativeTarget "FalconMDTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A01F0C2B0000000000000905 /* Debug */,
+				A01F0C2B0000000000000906 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A01F0C2B0000000000000703 /* Build configuration list for PBXProject "FalconMD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A01F0C2B0000000000000901 /* Debug */,
+				A01F0C2B0000000000000902 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A01F0C2B0000000000000300 /* XCRemoteSwiftPackageReference "swift-markdown-engine" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nodes-app/swift-markdown-engine";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.12.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A01F0C2B0000000000000301 /* MarkdownEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A01F0C2B0000000000000300 /* XCRemoteSwiftPackageReference "swift-markdown-engine" */;
+			productName = MarkdownEngine;
+		};
+		A01F0C2B0000000000000302 /* MarkdownEngineCodeBlocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A01F0C2B0000000000000300 /* XCRemoteSwiftPackageReference "swift-markdown-engine" */;
+			productName = MarkdownEngineCodeBlocks;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A01F0C2B0000000000000001 /* Project object */;
+}
