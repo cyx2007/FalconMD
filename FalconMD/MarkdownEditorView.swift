@@ -8,6 +8,7 @@ struct MarkdownEditorView: View {
     var fileURL: URL?
 
     @State private var session = EditorSession()
+    @State private var assetErrorMessage: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,11 +23,7 @@ struct MarkdownEditorView: View {
                 fontSize: 16,
                 documentId: session.documentId,
                 onPasteImage: { pasteboard in
-                    PastedImageWriter.markdown(
-                        from: pasteboard,
-                        documentURL: fileURL,
-                        sessionID: session.documentId
-                    )
+                    importPastedImage(from: pasteboard)
                 },
                 placeholder: NSAttributedString(
                     string: "Start writing…",
@@ -41,11 +38,7 @@ struct MarkdownEditorView: View {
         .background(Color(nsColor: .textBackgroundColor))
         .background {
             EditorTextViewHook { pasteboard in
-                PastedImageWriter.markdown(
-                    from: pasteboard,
-                    documentURL: fileURL,
-                    sessionID: session.documentId
-                )
+                importPastedImage(from: pasteboard)
             }
         }
         .focusedSceneValue(\.editorSession, session)
@@ -58,14 +51,72 @@ struct MarkdownEditorView: View {
                 session.findIndex = min(session.findIndex, session.findCount - 1)
             }
         }
-        .onChange(of: fileURL) { oldURL, newURL in
-            guard oldURL == nil, let newURL else { return }
-            document.text = DocumentAssets.consumeUnsavedAssets(
-                sessionID: session.documentId,
-                into: newURL,
-                text: document.text
-            )
+        .onReceive(NotificationCenter.default.publisher(for: FormatAction.name("importImage", session.documentId))) { note in
+            guard let imageURL = note.userInfo?["url"] as? URL else { return }
+            importImageFile(at: imageURL)
         }
+        .onChange(of: fileURL) { oldURL, newURL in
+            guard let newURL, oldURL != newURL else { return }
+            do {
+                document.text = try DocumentAssets.migrateAssets(
+                    sessionID: session.documentId,
+                    from: oldURL,
+                    to: newURL,
+                    text: document.text
+                )
+            } catch {
+                document.text = DocumentAssets.preservingSourceReferences(
+                    sessionID: session.documentId,
+                    oldDocumentURL: oldURL,
+                    text: document.text
+                )
+                presentAssetError(error)
+            }
+        }
+        .alert("Image Asset Error", isPresented: assetErrorPresented) {
+            Button("OK", role: .cancel) {
+                assetErrorMessage = nil
+            }
+        } message: {
+            Text(assetErrorMessage ?? "An unknown image error occurred.")
+        }
+    }
+
+    private var assetErrorPresented: Binding<Bool> {
+        Binding(
+            get: { assetErrorMessage != nil },
+            set: { if !$0 { assetErrorMessage = nil } }
+        )
+    }
+
+    private func importPastedImage(from pasteboard: NSPasteboard) -> String? {
+        do {
+            return try PastedImageWriter.markdown(
+                from: pasteboard,
+                documentURL: fileURL,
+                sessionID: session.documentId
+            )
+        } catch {
+            presentAssetError(error)
+            return nil
+        }
+    }
+
+    private func importImageFile(at imageURL: URL) {
+        do {
+            let destination = try PastedImageWriter.markdownDestination(
+                from: imageURL,
+                documentURL: fileURL,
+                sessionID: session.documentId
+            )
+            FormatAction.post(session.bus.applyImageRequest, userInfo: ["url": destination])
+        } catch {
+            presentAssetError(error)
+        }
+    }
+
+    private func presentAssetError(_ error: Error) {
+        assetErrorMessage = error.localizedDescription
     }
 
     private var configuration: MarkdownEditorConfiguration {
