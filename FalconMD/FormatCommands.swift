@@ -262,7 +262,8 @@ struct MarkdownFormatCommands: Commands {
         panel.allowsMultipleSelection = false
         panel.message = "Choose an image to insert"
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        post(session?.bus.applyImageRequest, userInfo: ["url": url.path])
+        guard let documentId = session?.documentId else { return }
+        post(FormatAction.name("importImage", documentId), userInfo: ["url": url])
     }
 
     private func prompt(title: String, placeholder: String) -> String? {

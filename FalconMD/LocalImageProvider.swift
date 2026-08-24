@@ -50,9 +50,11 @@ struct LocalImageProvider: EmbeddedImageProvider {
 /// Sidecar folder for pasted / dropped images.
 ///
 /// Saved documents use Typora's `{stem}.assets` next to the file. Unsaved
-/// documents write under Application Support until the first save, then the
-/// files and Markdown paths move next to the new file.
+/// documents write under Application Support until the first save, then their
+/// files and Markdown paths migrate next to the new file.
 enum DocumentAssets {
+    private static let staleUnsavedAssetAge: TimeInterval = 7 * 24 * 60 * 60
+
     static func unsavedRoot() -> URL {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         return appSupport.appendingPathComponent("FalconMD/Unsaved", isDirectory: true)
@@ -78,74 +80,229 @@ enum DocumentAssets {
         return unsavedFolder(sessionID: sessionID)
     }
 
-    /// Moves unsaved image files next to `documentURL` and rewrites Markdown paths.
-    static func consumeUnsavedAssets(
+    /// Copies assets to match a document URL change and rewrites their Markdown
+    /// references. Saved assets stay in place so Save As preserves the original.
+    static func migrateAssets(
         sessionID: String,
-        into documentURL: URL,
+        from oldDocumentURL: URL?,
+        to newDocumentURL: URL,
         text: String,
         unsavedRoot: URL = DocumentAssets.unsavedRoot()
-    ) -> String {
-        let source = unsavedFolder(sessionID: sessionID, root: unsavedRoot)
-        let dest = PastedImageWriter.assetsFolder(for: documentURL)
+    ) throws -> String {
+        let source: URL
+        let oldFolderName: String
+        let removeSourceAfterCopy: Bool
+        if let oldDocumentURL {
+            source = PastedImageWriter.assetsFolder(for: oldDocumentURL)
+            oldFolderName = source.lastPathComponent
+            removeSourceAfterCopy = false
+        } else {
+            source = unsavedFolder(sessionID: sessionID, root: unsavedRoot)
+            oldFolderName = sessionID
+            removeSourceAfterCopy = true
+        }
+
+        let dest = PastedImageWriter.assetsFolder(for: newDocumentURL)
         let fm = FileManager.default
+        let rewritten = rewritten(
+            rewritten(text, replacingFolder: oldFolderName, with: dest.lastPathComponent),
+            replacingFolder: source.path,
+            with: dest.lastPathComponent
+        )
+
+        guard source.standardizedFileURL != dest.standardizedFileURL else {
+            return rewritten
+        }
         guard fm.fileExists(atPath: source.path) else { return text }
 
-        try? fm.createDirectory(at: dest, withIntermediateDirectories: true)
-        if let items = try? fm.contentsOfDirectory(at: source, includingPropertiesForKeys: nil) {
-            for item in items {
-                let target = dest.appendingPathComponent(item.lastPathComponent)
+        let destinationExisted = fm.fileExists(atPath: dest.path)
+        var copiedItems: [URL] = []
+        do {
+            try fm.createDirectory(at: dest, withIntermediateDirectories: true)
+            try copyAssetContents(
+                from: source,
+                to: dest,
+                fileManager: fm,
+                copiedItems: &copiedItems
+            )
+        } catch {
+            for item in copiedItems.reversed() {
+                try? fm.removeItem(at: item)
+            }
+            if !destinationExisted {
+                try? fm.removeItem(at: dest)
+            }
+            throw AssetError.migrationFailed(source: source, destination: dest, underlying: error)
+        }
+
+        if removeSourceAfterCopy {
+            try? fm.removeItem(at: source)
+        }
+        return rewritten
+    }
+
+    private static func copyAssetContents(
+        from source: URL,
+        to destination: URL,
+        fileManager fm: FileManager,
+        copiedItems: inout [URL]
+    ) throws {
+        let keys: Set<URLResourceKey> = [.isRegularFileKey, .isDirectoryKey]
+        let items = try fm.contentsOfDirectory(
+            at: source,
+            includingPropertiesForKeys: Array(keys),
+            options: []
+        )
+        for item in items {
+            let values = try item.resourceValues(forKeys: keys)
+            let target = destination.appendingPathComponent(item.lastPathComponent)
+            if values.isDirectory == true {
                 if fm.fileExists(atPath: target.path) {
-                    try? fm.removeItem(at: target)
+                    let targetValues = try target.resourceValues(forKeys: [.isDirectoryKey])
+                    guard targetValues.isDirectory == true else {
+                        throw AssetError.destinationConflict(target)
+                    }
+                    try copyAssetContents(
+                        from: item,
+                        to: target,
+                        fileManager: fm,
+                        copiedItems: &copiedItems
+                    )
+                } else {
+                    try fm.copyItem(at: item, to: target)
+                    copiedItems.append(target)
                 }
-                try? fm.moveItem(at: item, to: target)
+            } else if values.isRegularFile == true {
+                if fm.fileExists(atPath: target.path) {
+                    guard fm.contentsEqual(atPath: item.path, andPath: target.path) else {
+                        throw AssetError.destinationConflict(target)
+                    }
+                } else {
+                    try fm.copyItem(at: item, to: target)
+                    copiedItems.append(target)
+                }
             }
         }
-        try? fm.removeItem(at: source)
-        return rewritten(text, replacingFolder: sessionID, with: dest.lastPathComponent)
     }
 
     static func rewritten(_ text: String, replacingFolder old: String, with new: String) -> String {
-        text.replacingOccurrences(of: "](\(old)/", with: "](\(new)/")
+        let encodedOld = PastedImageWriter.encodedMarkdownPath(old)
+        let encodedNew = PastedImageWriter.encodedMarkdownPath(new)
+        return text
+            .replacingOccurrences(of: "](\(old)/", with: "](\(encodedNew)/")
+            .replacingOccurrences(of: "](\(encodedOld)/", with: "](\(encodedNew)/")
+    }
+
+    /// Keeps images usable when a URL-change migration fails by pointing only
+    /// the affected asset references at their original absolute folder.
+    static func preservingSourceReferences(
+        sessionID: String,
+        oldDocumentURL: URL?,
+        text: String,
+        unsavedRoot: URL = DocumentAssets.unsavedRoot()
+    ) -> String {
+        let source: URL
+        let oldFolderName: String
+        if let oldDocumentURL {
+            source = PastedImageWriter.assetsFolder(for: oldDocumentURL)
+            oldFolderName = source.lastPathComponent
+        } else {
+            source = unsavedFolder(sessionID: sessionID, root: unsavedRoot)
+            oldFolderName = sessionID
+        }
+        return rewritten(text, replacingFolder: oldFolderName, with: source.path)
+    }
+
+    /// Removes abandoned unsaved-image sessions. Successful first saves are
+    /// cleaned immediately; this catches discarded documents and crashes.
+    static func cleanupStaleUnsavedAssets(
+        now: Date = Date(),
+        maximumAge: TimeInterval = staleUnsavedAssetAge,
+        root: URL = DocumentAssets.unsavedRoot()
+    ) {
+        let fm = FileManager.default
+        guard let folders = try? fm.contentsOfDirectory(
+            at: root,
+            includingPropertiesForKeys: [.contentModificationDateKey, .isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ) else { return }
+
+        for folder in folders {
+            guard let values = try? folder.resourceValues(
+                forKeys: [.contentModificationDateKey, .isDirectoryKey]
+            ), values.isDirectory == true,
+                  let modified = values.contentModificationDate,
+                  now.timeIntervalSince(modified) >= maximumAge else { continue }
+            try? fm.removeItem(at: folder)
+        }
     }
 }
 
 enum PastedImageWriter {
     /// Writes a pasteboard image into `assetsFolder` and returns Markdown to insert.
-    static func markdown(from pasteboard: NSPasteboard, assetsFolder: URL) -> String? {
+    static func markdown(from pasteboard: NSPasteboard, assetsFolder: URL) throws -> String {
         let fm = FileManager.default
         do {
             try fm.createDirectory(at: assetsFolder, withIntermediateDirectories: true)
             let fileURL: URL
             if let source = PasteboardImageReader.imageFileURL(from: pasteboard) {
-                var ext = source.pathExtension.lowercased()
-                if ext.isEmpty { ext = "png" }
-                let filename = "pasted-\(UUID().uuidString.lowercased()).\(ext)"
-                fileURL = assetsFolder.appendingPathComponent(filename)
-                if fm.fileExists(atPath: fileURL.path) {
-                    try fm.removeItem(at: fileURL)
-                }
-                try fm.copyItem(at: source, to: fileURL)
+                fileURL = try copyImageFile(source, into: assetsFolder)
             } else {
                 guard let png = PasteboardImageReader.imageData(from: pasteboard)
                         ?? pngData(from: NSImage(pasteboard: pasteboard)) else {
-                    return nil
+                    throw AssetError.noImageData
                 }
                 let filename = "pasted-\(UUID().uuidString.lowercased()).png"
                 fileURL = assetsFolder.appendingPathComponent(filename)
                 try png.write(to: fileURL, options: .atomic)
             }
-            let relative = "\(assetsFolder.lastPathComponent)/\(fileURL.lastPathComponent)"
+            let relative = encodedMarkdownPath(
+                "\(assetsFolder.lastPathComponent)/\(fileURL.lastPathComponent)"
+            )
             return "![](\(relative))"
         } catch {
-            return nil
+            throw AssetError.importFailed(destination: assetsFolder, underlying: error)
         }
     }
 
-    static func markdown(from pasteboard: NSPasteboard, documentURL: URL?, sessionID: String) -> String? {
-        markdown(
+    static func markdown(from pasteboard: NSPasteboard, documentURL: URL?, sessionID: String) throws -> String {
+        try markdown(
             from: pasteboard,
             assetsFolder: DocumentAssets.assetsFolder(documentURL: documentURL, sessionID: sessionID)
         )
+    }
+
+    static func markdown(from imageURL: URL, documentURL: URL?, sessionID: String) throws -> String {
+        let destination = try markdownDestination(
+            from: imageURL,
+            documentURL: documentURL,
+            sessionID: sessionID
+        )
+        return "![](\(destination))"
+    }
+
+    static func markdownDestination(
+        from imageURL: URL,
+        documentURL: URL?,
+        sessionID: String
+    ) throws -> String {
+        let assetsFolder = DocumentAssets.assetsFolder(documentURL: documentURL, sessionID: sessionID)
+        do {
+            try FileManager.default.createDirectory(at: assetsFolder, withIntermediateDirectories: true)
+            let copied = try copyImageFile(imageURL, into: assetsFolder)
+            return encodedMarkdownPath(
+                "\(assetsFolder.lastPathComponent)/\(copied.lastPathComponent)"
+            )
+        } catch {
+            throw AssetError.importFailed(destination: assetsFolder, underlying: error)
+        }
+    }
+
+    static func encodedMarkdownPath(_ raw: String) -> String {
+        let allowed = CharacterSet(
+            charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/"
+        )
+        return raw.addingPercentEncoding(withAllowedCharacters: allowed) ?? raw
     }
 
     static func assetsFolder(for documentURL: URL) -> URL {
@@ -160,6 +317,35 @@ enum PastedImageWriter {
             return nil
         }
         return bitmap.representation(using: .png, properties: [:])
+    }
+
+    private static func copyImageFile(_ source: URL, into assetsFolder: URL) throws -> URL {
+        var ext = source.pathExtension.lowercased()
+        if ext.isEmpty { ext = "png" }
+        let filename = "pasted-\(UUID().uuidString.lowercased()).\(ext)"
+        let destination = assetsFolder.appendingPathComponent(filename)
+        try FileManager.default.copyItem(at: source, to: destination)
+        return destination
+    }
+}
+
+enum AssetError: LocalizedError {
+    case noImageData
+    case destinationConflict(URL)
+    case importFailed(destination: URL, underlying: Error)
+    case migrationFailed(source: URL, destination: URL, underlying: Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .noImageData:
+            return "The pasteboard does not contain a readable image."
+        case .destinationConflict(let url):
+            return "A different asset already exists at \(url.path)."
+        case .importFailed(let destination, let underlying):
+            return "Could not copy the image into \(destination.path): \(underlying.localizedDescription)"
+        case .migrationFailed(let source, let destination, let underlying):
+            return "Could not migrate assets from \(source.path) to \(destination.path): \(underlying.localizedDescription)"
+        }
     }
 }
 

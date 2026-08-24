@@ -40,6 +40,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        Task.detached(priority: .utility) {
+            DocumentAssets.cleanupStaleUnsavedAssets()
+        }
         closeOpenPanels()
         showStartPage()
 
