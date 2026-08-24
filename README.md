@@ -33,6 +33,13 @@ You can also open `Sample.md` with **File → Open**.
 
 ## GitHub Actions
 
-Pushes to `main` and pull requests run tests, build a Release app, and upload `FalconMD.app.zip`.
+Pushes to `main` and pull requests run tests without uploading an app artifact.
 
-The package is **ad-hoc signed**. It runs on the machine that built it; distributing to other Macs needs a Developer ID certificate and notarization.
+Pushing a version tag such as `v0.1.0` builds a universal Release app, creates
+`FalconMD.dmg`, and publishes both the DMG and its SHA-256 checksum on the
+matching GitHub Release. The stable latest-download URL is:
+
+`https://github.com/cyx2007/FalconMD/releases/latest/download/FalconMD.dmg`
+
+The app inside the DMG is **ad-hoc signed**. Public distribution without
+Gatekeeper warnings still requires a Developer ID certificate and notarization.
