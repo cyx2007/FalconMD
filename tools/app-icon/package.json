@@ -1,0 +1,15 @@
+{
+  "name": "falconmd-app-icon-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.mjs",
+    "check": "node generate.mjs --check"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "dependencies": {
+    "sharp": "0.35.4"
+  }
+}

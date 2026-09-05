@@ -14,6 +14,9 @@
 		A01F0C2B0000000000000105 /* FormatCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000205 /* FormatCommands.swift */; };
 		A01F0C2B000000000000010A /* FindReplaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000209 /* FindReplaceBar.swift */; };
 		A01F0C2B000000000000010B /* StartPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B000000000000020A /* StartPageView.swift */; };
+		A01F0C2B000000000000010C /* DocumentOpening.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B000000000000020B /* DocumentOpening.swift */; };
+		A01F0C2B000000000000010D /* EditorScrollCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B000000000000020C /* EditorScrollCoordinator.swift */; };
+		A01F0C2B000000000000010E /* WindowInteractionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01F0C2B000000000000020D /* WindowInteractionTests.swift */; };
 		A01F0C2B0000000000000106 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A01F0C2B0000000000000206 /* Assets.xcassets */; };
 		A01F0C2B0000000000000107 /* MarkdownEngine in Frameworks */ = {isa = PBXBuildFile; productRef = A01F0C2B0000000000000301 /* MarkdownEngine */; };
 		A01F0C2B0000000000000108 /* MarkdownEngineCodeBlocks in Frameworks */ = {isa = PBXBuildFile; productRef = A01F0C2B0000000000000302 /* MarkdownEngineCodeBlocks */; };
@@ -40,6 +43,9 @@
 		A01F0C2B0000000000000205 /* FormatCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatCommands.swift; sourceTree = "<group>"; };
 		A01F0C2B0000000000000209 /* FindReplaceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindReplaceBar.swift; sourceTree = "<group>"; };
 		A01F0C2B000000000000020A /* StartPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPageView.swift; sourceTree = "<group>"; };
+		A01F0C2B000000000000020B /* DocumentOpening.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentOpening.swift; sourceTree = "<group>"; };
+		A01F0C2B000000000000020C /* EditorScrollCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorScrollCoordinator.swift; sourceTree = "<group>"; };
+		A01F0C2B000000000000020D /* WindowInteractionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowInteractionTests.swift; sourceTree = "<group>"; };
 		A01F0C2B0000000000000206 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A01F0C2B0000000000000208 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A01F0C2B0000000000000207 /* MarkdownDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocumentTests.swift; sourceTree = "<group>"; };
@@ -84,6 +90,8 @@
 				A01F0C2B0000000000000205 /* FormatCommands.swift */,
 				A01F0C2B0000000000000209 /* FindReplaceBar.swift */,
 				A01F0C2B000000000000020A /* StartPageView.swift */,
+				A01F0C2B000000000000020B /* DocumentOpening.swift */,
+				A01F0C2B000000000000020C /* EditorScrollCoordinator.swift */,
 				A01F0C2B0000000000000206 /* Assets.xcassets */,
 				A01F0C2B0000000000000208 /* Info.plist */,
 			);
@@ -94,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				A01F0C2B0000000000000207 /* MarkdownDocumentTests.swift */,
+				A01F0C2B000000000000020D /* WindowInteractionTests.swift */,
 			);
 			path = FalconMDTests;
 			sourceTree = "<group>";
@@ -220,6 +229,8 @@
 				A01F0C2B0000000000000105 /* FormatCommands.swift in Sources */,
 				A01F0C2B000000000000010A /* FindReplaceBar.swift in Sources */,
 				A01F0C2B000000000000010B /* StartPageView.swift in Sources */,
+				A01F0C2B000000000000010C /* DocumentOpening.swift in Sources */,
+				A01F0C2B000000000000010D /* EditorScrollCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,6 +239,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A01F0C2B0000000000000109 /* MarkdownDocumentTests.swift in Sources */,
+				A01F0C2B000000000000010E /* WindowInteractionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

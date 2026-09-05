@@ -15,6 +15,7 @@ xcuserdata/
 timeline.xctimeline
 playground.xcworkspace
 .env
+tools/app-icon/node_modules/
 *.swp
 *~
 

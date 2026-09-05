@@ -351,28 +351,43 @@ enum AssetError: LocalizedError {
 
 // MARK: - Drop hook
 
-/// Finds the engine's `NSTextView` in the key window and:
+/// Finds the engine's `NSTextView` in this window and:
 /// - turns off the system find bar (we own ⌘F)
-/// - intercepts image file drops so they land in the document assets folder
+/// - opens dropped documents and imports images into the document assets folder
+/// - connects native page/table scrolling and find-result reveal
 struct EditorTextViewHook: NSViewRepresentable {
+    var session: EditorSession
+    var onDocumentTargetChanged: (Bool) -> Void
     var onImage: (NSPasteboard) -> String?
 
     func makeNSView(context: Context) -> HookView {
         let view = HookView()
+        view.session = session
+        view.onDocumentTargetChanged = onDocumentTargetChanged
         view.onImage = onImage
         return view
     }
 
     func updateNSView(_ view: HookView, context: Context) {
+        view.session = session
+        view.onDocumentTargetChanged = onDocumentTargetChanged
         view.onImage = onImage
         view.installIfNeeded()
     }
 
+    static func dismantleNSView(_ view: HookView, coordinator: ()) {
+        view.scrollCoordinator.stop()
+    }
+
     final class HookView: NSView {
+        var session: EditorSession?
+        var onDocumentTargetChanged: ((Bool) -> Void)?
         var onImage: ((NSPasteboard) -> String?)?
+        let scrollCoordinator = EditorScrollCoordinator()
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
+            if window == nil { scrollCoordinator.stop() }
             DispatchQueue.main.async { [weak self] in
                 self?.installIfNeeded()
             }
@@ -383,9 +398,12 @@ struct EditorTextViewHook: NSViewRepresentable {
             textView.usesFindBar = false
             textView.usesFindPanel = false
             textView.isIncrementalSearchingEnabled = false
-            ImageDropHook.attach(to: textView) { [weak self] pasteboard in
-                self?.onImage?(pasteboard)
-            }
+            EditorDropHook.attach(
+                to: textView,
+                onDocumentTargetChanged: { [weak self] in self?.onDocumentTargetChanged?($0) },
+                handler: { [weak self] in self?.onImage?($0) }
+            )
+            if let session { scrollCoordinator.attach(to: textView, session: session) }
         }
 
         private func firstDocumentTextView() -> NSTextView? {
@@ -405,14 +423,25 @@ struct EditorTextViewHook: NSViewRepresentable {
     }
 }
 
-private final class ImageDropHandlerBox: NSObject {
-    let handle: (NSPasteboard) -> String?
-    init(_ handle: @escaping (NSPasteboard) -> String?) {
+private final class EditorDropHandlerBox: NSObject {
+    var handle: (NSPasteboard) -> String?
+    var onDocumentTargetChanged: (Bool) -> Void
+    var openDocuments: ([URL]) -> Void
+    var documents: [URL] = []
+    var rejectsFiles = false
+    init(
+        _ handle: @escaping (NSPasteboard) -> String?,
+        onDocumentTargetChanged: @escaping (Bool) -> Void,
+        openDocuments: @escaping ([URL]) -> Void
+    ) {
         self.handle = handle
+        self.onDocumentTargetChanged = onDocumentTargetChanged
+        self.openDocuments = openDocuments
     }
 }
 
-enum ImageDropHook {
+@MainActor
+enum EditorDropHook {
     nonisolated(unsafe) private static let handlerKey = UnsafeRawPointer(bitPattern: 0xF1A6_E01D)!
 
     private static let swizzleOnce: Void = {
@@ -420,6 +449,14 @@ enum ImageDropHook {
                 #selector(NSTextView.falconmd_performDragOperation(_:)))
         swizzle(#selector(NSTextView.draggingEntered(_:)),
                 #selector(NSTextView.falconmd_draggingEntered(_:)))
+        swizzle(#selector(NSTextView.draggingUpdated(_:)),
+                #selector(NSTextView.falconmd_draggingUpdated(_:)))
+        swizzle(#selector(NSTextView.draggingExited(_:)),
+                #selector(NSTextView.falconmd_draggingExited(_:)))
+        swizzle(#selector(NSTextView.draggingEnded(_:)),
+                #selector(NSTextView.falconmd_draggingEnded(_:)))
+        swizzle(#selector(NSTextView.prepareForDragOperation(_:)),
+                #selector(NSTextView.falconmd_prepareForDragOperation(_:)))
     }()
 
     private static func swizzle(_ original: Selector, _ swizzled: Selector) {
@@ -444,34 +481,102 @@ enum ImageDropHook {
         }
     }
 
-    static func attach(to textView: NSTextView, handler: @escaping (NSPasteboard) -> String?) {
+    static func attach(
+        to textView: NSTextView,
+        onDocumentTargetChanged: @escaping (Bool) -> Void = { _ in },
+        openDocuments: @escaping ([URL]) -> Void = { DocumentOpening.open($0) },
+        handler: @escaping (NSPasteboard) -> String?
+    ) {
         _ = swizzleOnce
+        textView.registerForDraggedTypes([.fileURL])
+        if let existing = Self.handler(for: textView) {
+            existing.handle = handler
+            existing.onDocumentTargetChanged = onDocumentTargetChanged
+            existing.openDocuments = openDocuments
+            return
+        }
         objc_setAssociatedObject(
             textView,
             handlerKey,
-            ImageDropHandlerBox(handler),
+            EditorDropHandlerBox(
+                handler, onDocumentTargetChanged: onDocumentTargetChanged, openDocuments: openDocuments
+            ),
             .OBJC_ASSOCIATION_RETAIN_NONATOMIC
         )
     }
 
-    fileprivate static func handler(for textView: NSTextView) -> ((NSPasteboard) -> String?)? {
-        (objc_getAssociatedObject(textView, handlerKey) as? ImageDropHandlerBox)?.handle
+    fileprivate static func handler(for textView: NSTextView) -> EditorDropHandlerBox? {
+        objc_getAssociatedObject(textView, handlerKey) as? EditorDropHandlerBox
     }
 }
 
 extension NSTextView {
     @objc func falconmd_draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        if ImageDropHook.handler(for: self) != nil,
+        if let handler = EditorDropHook.handler(for: self) {
+            handler.documents = DocumentOpening.droppedDocuments(from: sender.draggingPasteboard)
+            let files = DocumentOpening.fileURLs(from: sender.draggingPasteboard)
+            handler.rejectsFiles = !files.isEmpty && handler.documents.isEmpty && !files.allSatisfy {
+                guard let values = try? $0.resourceValues(forKeys: [.isRegularFileKey, .contentTypeKey]) else { return false }
+                return values.isRegularFile == true && values.contentType?.conforms(to: .image) == true
+            }
+            handler.onDocumentTargetChanged(!handler.documents.isEmpty)
+            if !handler.documents.isEmpty { return .copy }
+            if handler.rejectsFiles { return [] }
+        }
+        if EditorDropHook.handler(for: self) != nil,
            PasteboardImageReader.canPasteImage(from: sender.draggingPasteboard) {
             return .copy
         }
         return falconmd_draggingEntered(sender)
     }
 
+    @objc func falconmd_draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if EditorDropHook.handler(for: self)?.rejectsFiles == true { return [] }
+        if let handler = EditorDropHook.handler(for: self), !handler.documents.isEmpty { return .copy }
+        return falconmd_draggingUpdated(sender)
+    }
+
+    @objc func falconmd_prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        if EditorDropHook.handler(for: self)?.rejectsFiles == true { return false }
+        if let handler = EditorDropHook.handler(for: self), !handler.documents.isEmpty { return true }
+        return falconmd_prepareForDragOperation(sender)
+    }
+
+    @objc func falconmd_draggingExited(_ sender: NSDraggingInfo?) {
+        if let handler = EditorDropHook.handler(for: self) {
+            handler.documents = []
+            handler.rejectsFiles = false
+            handler.onDocumentTargetChanged(false)
+        }
+        falconmd_draggingExited(sender)
+    }
+
+    @objc func falconmd_draggingEnded(_ sender: NSDraggingInfo) {
+        if let handler = EditorDropHook.handler(for: self) {
+            handler.documents = []
+            handler.rejectsFiles = false
+            handler.onDocumentTargetChanged(false)
+        }
+        falconmd_draggingEnded(sender)
+    }
+
     @objc func falconmd_performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        if let handler = ImageDropHook.handler(for: self),
+        if let handler = EditorDropHook.handler(for: self) {
+            handler.onDocumentTargetChanged(false)
+            let acceptedDocuments = handler.documents
+            handler.documents = []
+            if handler.rejectsFiles { return false }
+            let documents = acceptedDocuments.isEmpty
+                ? DocumentOpening.droppedDocuments(from: sender.draggingPasteboard)
+                : acceptedDocuments
+            if !documents.isEmpty {
+                handler.openDocuments(documents)
+                return true
+            }
+        }
+        if let handler = EditorDropHook.handler(for: self),
            PasteboardImageReader.canPasteImage(from: sender.draggingPasteboard),
-           let markdown = handler(sender.draggingPasteboard),
+           let markdown = handler.handle(sender.draggingPasteboard),
            !markdown.isEmpty {
             insertImageMarkdown(markdown)
             return true
