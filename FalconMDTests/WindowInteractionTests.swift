@@ -175,12 +175,13 @@ struct NativeScrollTests {
         let coordinator = EditorScrollCoordinator()
         coordinator.attach(to: textView, session: EditorSession())
         defer { coordinator.stop() }
+        let initialTableOrigin = table.contentView.bounds.origin
         let horizontal = try #require(CGEvent(
             scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2,
             wheel1: 0, wheel2: -100, wheel3: 0
         ).flatMap(NSEvent.init(cgEvent:)))
         #expect(coordinator.route(horizontal, at: NSPoint(x: 200, y: 100)) == nil)
-        try await Task.sleep(for: .milliseconds(100))
+        try await waitForNativeScrolling(table, from: initialTableOrigin)
         var tableX = table.contentView.bounds.origin.x
         #expect(tableX > 0)
         #expect(page.contentView.bounds.origin.y == 0)
@@ -191,8 +192,9 @@ struct NativeScrollTests {
         ))
         shiftedCGEvent.flags = .maskShift
         let shifted = try #require(NSEvent(cgEvent: shiftedCGEvent))
+        let originBeforeShift = table.contentView.bounds.origin
         #expect(coordinator.route(shifted, at: NSPoint(x: 200, y: 100)) == nil)
-        try await Task.sleep(for: .milliseconds(100))
+        try await waitForNativeScrolling(table, from: originBeforeShift)
         #expect(table.contentView.bounds.origin.x > tableX)
         #expect(page.contentView.bounds.origin.y == 0)
         tableX = table.contentView.bounds.origin.x
@@ -200,8 +202,9 @@ struct NativeScrollTests {
             scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2,
             wheel1: -100, wheel2: 0, wheel3: 0
         ).flatMap(NSEvent.init(cgEvent:)))
+        let initialPageOrigin = page.contentView.bounds.origin
         #expect(coordinator.route(vertical, at: NSPoint(x: 200, y: 100)) == nil)
-        try await Task.sleep(for: .milliseconds(100))
+        try await waitForNativeScrolling(page, from: initialPageOrigin)
         #expect(page.contentView.bounds.origin.y > 0)
         #expect(table.contentView.bounds.origin.x == tableX)
     }
@@ -225,12 +228,37 @@ struct NativeScrollTests {
             wheel1: 0, wheel2: -120, wheel3: 0
         ).flatMap(NSEvent.init(cgEvent:)))
         #expect(event.scrollingDeltaX < 0)
+        let initialOrigin = scroll.contentView.bounds.origin
         EditorScrollCoordinator.scrollNatively(scroll, with: event)
-        try await Task.sleep(for: .milliseconds(100))
+        try await waitForNativeScrolling(scroll, from: initialOrigin)
         #expect(scroll.contentView.bounds.origin.x > 0)
         #expect(scroll.contentView.bounds.origin.y == 0)
         #expect(!scroll.receivedOverride)
     }
+}
+
+/// AppKit can animate wheel ticks for longer than a fixed delay on CI runners.
+/// Wait for actual movement and a stable position before comparing the two axes.
+@MainActor
+private func waitForNativeScrolling(_ scrollView: NSScrollView, from initialOrigin: NSPoint) async throws {
+    let clock = ContinuousClock()
+    let deadline = clock.now.advanced(by: .seconds(3))
+    var lastOrigin = initialOrigin
+    var stableSince = clock.now
+    while clock.now < deadline {
+        try await Task.sleep(for: .milliseconds(20))
+        let origin = scrollView.contentView.bounds.origin
+        if origin != lastOrigin {
+            lastOrigin = origin
+            stableSince = clock.now
+        } else if origin != initialOrigin, stableSince.duration(to: clock.now) >= .milliseconds(150) {
+            return
+        }
+    }
+    try #require(
+        Bool(false),
+        "Native scrolling did not move and settle: initial \(initialOrigin), final \(scrollView.contentView.bounds.origin)"
+    )
 }
 
 @MainActor
