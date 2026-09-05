@@ -51,10 +51,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let window = notification.object as? NSWindow,
-                  window.windowController?.document is NSDocument else { return }
+            guard let window = notification.object as? NSWindow else { return }
             Task { @MainActor in
-                guard let self, window !== self.startWindow else { return }
+                guard let self, window !== self.startWindow,
+                      window.windowController?.document is NSDocument else { return }
                 self.hideStartPage()
             }
         }
