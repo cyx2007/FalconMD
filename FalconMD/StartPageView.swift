@@ -29,6 +29,7 @@ struct StartPageView: View {
     var previewRecents: [URL]? = nil
 
     @State private var recents: [URL] = []
+    @State private var isDocumentDropTargeted = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -43,6 +44,8 @@ struct StartPageView: View {
         }
         .frame(width: 740, height: 460)
         .background(Color(nsColor: .windowBackgroundColor))
+        .onDrop(of: [.fileURL], delegate: DocumentFileDropDelegate(isTargeted: $isDocumentDropTargeted))
+        .overlay { DocumentDropHighlight(isTargeted: isDocumentDropTargeted) }
         .onAppear(perform: reloadRecents)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             reloadRecents()
@@ -81,6 +84,10 @@ struct StartPageView: View {
             }
 
             Spacer(minLength: 0)
+
+            Text("Drop Markdown files here to open.")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
         }
         .padding(.leading, 36)
         .padding(.trailing, 24)
@@ -145,13 +152,7 @@ struct StartPageView: View {
     }
 
     private func open(_ urls: [URL]) {
-        for url in urls {
-            NSDocumentController.shared.openDocument(withContentsOf: url, display: true) { _, _, error in
-                if let error {
-                    NSApp.presentError(error)
-                }
-            }
-        }
+        DocumentOpening.open(urls)
     }
 }
 

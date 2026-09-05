@@ -9,6 +9,7 @@ struct MarkdownEditorView: View {
 
     @State private var session = EditorSession()
     @State private var assetErrorMessage: String?
+    @State private var isDocumentDropTargeted = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,31 +17,25 @@ struct MarkdownEditorView: View {
                 FindReplaceBar(session: session)
             }
 
-            NativeTextViewWrapper(
-                text: $document.text,
-                configuration: configuration,
-                fontName: "SF Pro",
-                fontSize: 16,
-                documentId: session.documentId,
-                onPasteImage: { pasteboard in
-                    importPastedImage(from: pasteboard)
-                },
-                placeholder: NSAttributedString(
-                    string: "Start writing…",
-                    attributes: [
-                        .font: NSFont.systemFont(ofSize: 16),
-                        .foregroundColor: NSColor.tertiaryLabelColor,
-                    ]
-                )
-            )
+            GeometryReader { geometry in
+                ScrollView(.vertical) {
+                    editor
+                        .frame(minHeight: geometry.size.height, alignment: .top)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+            }
         }
         .frame(minWidth: 560, minHeight: 400)
         .background(Color(nsColor: .textBackgroundColor))
         .background {
-            EditorTextViewHook { pasteboard in
-                importPastedImage(from: pasteboard)
-            }
+            EditorTextViewHook(
+                session: session,
+                onDocumentTargetChanged: { isDocumentDropTargeted = $0 },
+                onImage: { importPastedImage(from: $0) }
+            )
         }
+        .onDrop(of: [.fileURL], delegate: DocumentFileDropDelegate(isTargeted: $isDocumentDropTargeted))
+        .overlay { DocumentDropHighlight(isTargeted: isDocumentDropTargeted) }
         .focusedSceneValue(\.editorSession, session)
         .focusedValue(\.editorSession, session)
         .onReceive(NotificationCenter.default.publisher(for: FormatAction.name("findResults", session.documentId))) { note in
@@ -82,6 +77,26 @@ struct MarkdownEditorView: View {
         }
     }
 
+    private var editor: some View {
+        NativeTextViewWrapper(
+            text: $document.text,
+            configuration: configuration,
+            fontName: "SF Pro",
+            fontSize: 16,
+            documentId: session.documentId,
+            onPasteImage: { pasteboard in
+                importPastedImage(from: pasteboard)
+            },
+            placeholder: NSAttributedString(
+                string: "Start writing…",
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 16),
+                    .foregroundColor: NSColor.tertiaryLabelColor,
+                ]
+            )
+        )
+    }
+
     private var assetErrorPresented: Binding<Bool> {
         Binding(
             get: { assetErrorMessage != nil },
@@ -121,6 +136,9 @@ struct MarkdownEditorView: View {
 
     private var configuration: MarkdownEditorConfiguration {
         var config = MarkdownEditorConfiguration.default
+        // The outer page owns scrolling. This avoids the engine's repeated
+        // full-layout bottom clamp while preserving its content-height updates.
+        config.heightBehavior = .fitsContent
         config.readingWidth = 720
         config.textInsets = TextInsets(horizontal: 28, vertical: 36)
         config.rawSourceMode = session.showRawSource

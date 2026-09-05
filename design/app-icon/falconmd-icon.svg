@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">FalconMD · 纸页成隼</title>
+  <desc id="desc">深墨蓝底上的纸白色展翼隼，青色折角。两个纯色矢量形状，无纹理或阴影。</desc>
+  <rect id="background" width="256" height="256" fill="#0B1730"/>
+  <path id="falcon" fill="#F6F3EB" d="M54 43 129 79C143 86 150 97 159 112L167 126 177 116Q186 108 197 113L210 120Q216 123 214 133L206 127H196L162 157 85 215 113 157 139 142C121 127 109 116 101 105Z"/>
+  <path id="fold" fill="#4FD1D8" d="M158 166 174 152 203 196Z"/>
+</svg>
